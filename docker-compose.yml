@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  ml-service:
+    build: ./Loan Approval ML
+    ports:
+      - "8000:8000"
+
+  loan-backend:
+    build: ./loan-approval-java
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ml-service
