@@ -26,7 +26,6 @@ public class LoanController {
         this.repository = repository;
     }
 
-    // ---------------- APPLY FOR LOAN ----------------
     @PostMapping("/apply")
     public LoanResponse applyLoan(@RequestBody LoanRequest request) {
 
@@ -34,7 +33,6 @@ public class LoanController {
         return loanService.processLoan(request);
     }
 
-    // ---------------- LOAN HISTORY ----------------
     @GetMapping("/history")
     public List<LoanApplication> getLoanHistory() {
 
