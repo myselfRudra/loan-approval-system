@@ -70,7 +70,6 @@ public class LoanService {
         }
     }
 
-    // ---------- DB SAVE ----------
     private void saveToDatabase(LoanRequest request,
             LoanResponse response) {
 
