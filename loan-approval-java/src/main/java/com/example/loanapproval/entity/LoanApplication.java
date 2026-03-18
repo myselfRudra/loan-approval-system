@@ -20,8 +20,6 @@ public class LoanApplication {
 
     private LocalDateTime createdAt;
 
-    // -------- GETTERS & SETTERS --------
-
     public Long getId() {
         return id;
     }

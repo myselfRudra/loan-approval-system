@@ -18,7 +18,6 @@ public class MlClient {
 
     private final RestTemplate restTemplate;
 
-    // ---- TIMEOUT CONFIGURATION ----
     public MlClient() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
 

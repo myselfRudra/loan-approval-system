@@ -32,7 +32,6 @@ public class LoanService {
                 request.getIncomeAnnum(),
                 request.getLoanAmount());
 
-        // ---------- BUSINESS RULE ----------
         if (request.getCibilScore() < 500) {
             log.warn("Loan rejected due to low CIBIL score");
 
@@ -44,7 +43,6 @@ public class LoanService {
             return response;
         }
 
-        // ---------- ML CALL WITH FALLBACK ----------
         try {
             log.info("Calling ML microservice");
             LoanResponse mlResponse = mlClient.callMl(request);

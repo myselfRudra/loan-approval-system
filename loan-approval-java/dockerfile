@@ -1,15 +1,29 @@
+# -------- BUILD STAGE --------
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
+
+# Copy only pom first (better caching)
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
+# Copy source code
 COPY src ./src
-RUN mvn package -DskipTests
 
+# Build jar
+RUN mvn clean package -DskipTests
+
+
+# -------- RUN STAGE --------
 FROM eclipse-temurin:17-jre
+
 WORKDIR /app
+
+# Copy built jar
 COPY --from=build /app/target/*.jar app.jar
 
+# Expose port
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# JVM optimization (important for containers)
+ENTRYPOINT ["java", "-Xms256m", "-Xmx512m", "-jar", "app.jar"]

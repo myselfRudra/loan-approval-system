@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoanSense — Smart Loan Decisions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --border: #2a2a35;
+      --accent: #00e5a0;
+      --accent2: #5b8fff;
+      --warn: #ffb340;
+      --danger: #ff4d6d;
+      --text: #e8e8f0;
+      --text-dim: #7a7a90;
+      --text-muted: #3a3a50;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
+    .orb-1 { width: 400px; height: 400px; background: rgba(0,229,160,0.08); top: -100px; left: -100px; }
+    .orb-2 { width: 350px; height: 350px; background: rgba(91,143,255,0.07); bottom: 0; right: 0; }
+
+    .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+    .logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
+    nav { display: flex; gap: 4px; }
+    .nav-btn { background: none; border: 1px solid transparent; color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; padding: 7px 16px; border-radius: 6px; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; }
+    .nav-btn:hover { color: var(--text); border-color: var(--border); }
+    .nav-btn.active { color: var(--accent); border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.06); }
+
+    .hero { padding: 80px 0 48px; animation: fadeUp 0.6s ease both; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(0,229,160,0.2); padding: 5px 12px; border-radius: 100px; margin-bottom: 24px; }
+    .hero h1 { font-family: var(--font-head); font-size: clamp(36px,5vw,60px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; margin-bottom: 16px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { color: var(--text-dim); font-size: 15px; line-height: 1.7; max-width: 520px; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp 0.4s ease both; }
+
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; margin-bottom: 24px; }
+    .section-title { font-family: var(--font-head); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 28px; display: flex; align-items: center; gap: 12px; }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 20px; }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+    .field input, .field select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 14px; padding: 12px 16px; border-radius: 8px; outline: none; transition: all 0.2s; -webkit-appearance: none; }
+    .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,160,0.1); }
+    .field input::placeholder { color: var(--text-muted); }
+    .field select option { background: var(--surface2); }
+
+    .toggle-group { display: flex; gap: 8px; }
+    .toggle-opt { flex:1; padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
+    .toggle-opt.selected { border-color: var(--accent); background: rgba(0,229,160,0.08); color: var(--accent); }
+
+    .submit-row { display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 60px; }
+    .btn-submit { background: var(--accent); color: #000; font-family: var(--font-head); font-size: 14px; font-weight: 700; letter-spacing: 1px; padding: 14px 40px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; position: relative; overflow: hidden; }
+    .btn-submit::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.15); opacity:0; transition:opacity 0.2s; }
+    .btn-submit:hover::after { opacity:1; }
+    .btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,229,160,0.3); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .spinner { width:16px; height:16px; border:2px solid rgba(0,0,0,0.3); border-top-color:#000; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+    .btn-submit.loading .spinner { display:block; }
+    .btn-submit.loading .btn-text { display:none; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .result-card { border:1px solid var(--border); border-radius:16px; padding:36px 40px; margin-bottom:24px; display:none; animation:fadeUp 0.4s ease both; position:relative; overflow:hidden; }
+    .result-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .result-card.approved { background:rgba(0,229,160,0.04); border-color:rgba(0,229,160,0.3); }
+    .result-card.approved::before { background:var(--accent); }
+    .result-card.rejected { background:rgba(255,77,109,0.04); border-color:rgba(255,77,109,0.3); }
+    .result-card.rejected::before { background:var(--danger); }
+    .result-card.high-risk { background:rgba(255,179,64,0.04); border-color:rgba(255,179,64,0.3); }
+    .result-card.high-risk::before { background:var(--warn); }
+    .result-card.manual { background:rgba(91,143,255,0.04); border-color:rgba(91,143,255,0.3); }
+    .result-card.manual::before { background:var(--accent2); }
+
+    .result-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:20px; }
+    .decision-badge { display:inline-flex; align-items:center; gap:8px; font-family:var(--font-head); font-size:28px; font-weight:800; letter-spacing:-1px; }
+    .decision-badge.approved { color:var(--accent); }
+    .decision-badge.rejected { color:var(--danger); }
+    .decision-badge.high-risk { color:var(--warn); }
+    .decision-badge.manual { color:var(--accent2); }
+    .risk-meter { text-align:right; }
+    .risk-label { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
+    .risk-bar-wrap { width:200px; height:6px; background:var(--surface2); border-radius:100px; overflow:hidden; }
+    .risk-bar-fill { height:100%; border-radius:100px; transition:width 1s cubic-bezier(0.16,1,0.3,1); }
+    .risk-value { font-family:var(--font-head); font-size:22px; font-weight:700; margin-top:6px; text-align:right; }
+    .result-desc { font-size:14px; color:var(--text-dim); line-height:1.7; }
+
+    .history-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .btn-refresh { background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-family:var(--font-mono); font-size:12px; padding:8px 20px; border-radius:6px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+    .btn-refresh:hover { color:var(--text); border-color:var(--accent); }
+    .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:60px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th { padding:14px 20px; text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); font-weight:500; }
+    tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--surface2); }
+    tbody td { padding:16px 20px; color:var(--text-dim); }
+    tbody td:first-child { color:var(--text-muted); font-size:12px; }
+
+    .badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:0.5px; }
+    .badge.approved { background:rgba(0,229,160,0.1); color:var(--accent); }
+    .badge.rejected { background:rgba(255,77,109,0.1); color:var(--danger); }
+    .badge.high_risk { background:rgba(255,179,64,0.1); color:var(--warn); }
+    .badge.manual_review { background:rgba(91,143,255,0.1); color:var(--accent2); }
+
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:13px; }
+    .empty-state svg { margin:0 auto 16px; display:block; opacity:0.3; }
+
+    .toast { position:fixed; bottom:32px; right:32px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 20px; font-size:13px; color:var(--text); z-index:999; transform:translateY(20px); opacity:0; transition:all 0.3s; max-width:320px; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.error { border-color:rgba(255,77,109,0.4); }
+
+    @media (max-width: 600px) {
+      .form-card { padding: 24px 16px; }
+      .result-card { padding: 24px 16px; }
+      .risk-bar-wrap { width: 140px; }
+      .hero h1 { letter-spacing: -1px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        LoanSense
+      </div>
+      <nav>
+        <button class="nav-btn active" onclick="switchTab('apply', this)">Apply</button>
+        <button class="nav-btn" onclick="switchTab('history', this)">History</button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="hero">
+    <div class="hero-tag">
+      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="4" fill="#00e5a0"/></svg>
+      ML-Powered Decision Engine
+    </div>
+    <h1>Smart Loan<br><span>Approvals</span></h1>
+    <p>Submit your application and get an instant AI-driven decision — backed by CIBIL score analysis and machine learning risk scoring.</p>
+  </div>
+
+  <!-- APPLY TAB -->
+  <div id="tab-apply" class="tab-panel active">
+
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Decision</div>
+          <div class="decision-badge" id="decisionBadge"></div>
+        </div>
+        <div class="risk-meter">
+          <div class="risk-label">Risk Score</div>
+          <div class="risk-bar-wrap">
+            <div class="risk-bar-fill" id="riskBarFill" style="width:0%"></div>
+          </div>
+          <div class="risk-value" id="riskValue">—</div>
+        </div>
+      </div>
+      <div class="result-desc" id="resultDesc"></div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-title">Personal Info</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>No. of Dependents</label>
+          <input type="number" id="noOfDependents" placeholder="e.g. 2" min="0" max="10" />
+        </div>
+        <div class="field">
+          <label>Annual Income (₹)</label>
+          <input type="number" id="incomeAnnum" placeholder="e.g. 1200000" />
+        </div>
+        <div class="field">
+          <label>Education</label>
+          <div class="toggle-group" id="educationToggle">
+            <div class="toggle-opt selected" onclick="selectToggle('educationToggle','educationGraduate',this,1)">Graduate</div>
+            <div class="toggle-opt" onclick="selectToggle('educationToggle','educationGraduate',this,0)">Not Graduate</div>
+          </div>
+          <input type="hidden" id="educationGraduate" value="1" />
+        </div>
+        <div class="field">
+          <label>Self Employed</label>
+          <div class="toggle-group" id="selfEmployedToggle">
+            <div class="toggle-opt selected" onclick="selectToggle('selfEmployedToggle','selfEmployedYes',this,0)">No</div>
+            <div class="toggle-opt" onclick="selectToggle('selfEmployedToggle','selfEmployedYes',this,1)">Yes</div>
+          </div>
+          <input type="hidden" id="selfEmployedYes" value="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-title">Loan Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Loan Amount (₹)</label>
+          <input type="number" id="loanAmount" placeholder="e.g. 5000000" />
+        </div>
+        <div class="field">
+          <label>Loan Term (months)</label>
+          <input type="number" id="loanTerm" placeholder="e.g. 24" min="1" max="360" />
+        </div>
+        <div class="field">
+          <label>CIBIL Score</label>
+          <input type="number" id="cibilScore" placeholder="300 – 900" min="300" max="900" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-title">Assets</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Residential Assets (₹)</label>
+          <input type="number" id="residentialAssetsValue" placeholder="e.g. 3000000" />
+        </div>
+        <div class="field">
+          <label>Commercial Assets (₹)</label>
+          <input type="number" id="commercialAssetsValue" placeholder="e.g. 0" />
+        </div>
+        <div class="field">
+          <label>Luxury Assets (₹)</label>
+          <input type="number" id="luxuryAssetsValue" placeholder="e.g. 500000" />
+        </div>
+        <div class="field">
+          <label>Bank Asset Value (₹)</label>
+          <input type="number" id="bankAssetValue" placeholder="e.g. 200000" />
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-submit" id="submitBtn" onclick="submitLoan()">
+        <div class="spinner"></div>
+        <span class="btn-text">Analyse Application →</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="tab-history" class="tab-panel">
+    <div class="history-header">
+      <div style="font-family:var(--font-head);font-size:18px;font-weight:700;">Application History</div>
+      <button class="btn-refresh" onclick="loadHistory()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10.5 2C9.5 0.8 8 0 6.3 0C3 0 0.3 2.7 0.3 6S3 12 6.3 12c2.6 0 4.8-1.7 5.6-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10.5 0v2h-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>CIBIL Score</th>
+            <th>Income (₹)</th>
+            <th>Loan Amount (₹)</th>
+            <th>Risk Score</th>
+            <th>Decision</th>
+            <th>Applied At</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="7"><div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" stroke="#3a3a50" stroke-width="1.5"/><path d="M14 20h12M14 14h12M14 26h6" stroke="#3a3a50" stroke-width="1.5" stroke-linecap="round"/></svg>
+            No applications yet
+          </div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── CONFIG — change this if backend runs on a different port ───
+  const API = 'http://localhost:8080/api/loans';
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'history') loadHistory();
+  }
+
+  function selectToggle(groupId, hiddenId, el, val) {
+    document.querySelectorAll('#' + groupId + ' .toggle-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById(hiddenId).value = val;
+  }
+
+  async function submitLoan() {
+    const fields = ['noOfDependents','incomeAnnum','loanAmount','loanTerm','cibilScore',
+                    'residentialAssetsValue','commercialAssetsValue','luxuryAssetsValue','bankAssetValue'];
+    const payload = {};
+    for (const f of fields) {
+      const v = document.getElementById(f).value.trim();
+      if (v === '' || isNaN(v)) {
+        showToast('Please fill in: ' + f.replace(/([A-Z])/g,' $1').trim(), true);
+        return;
+      }
+      payload[f] = Number(v);
+    }
+    payload.educationGraduate = Number(document.getElementById('educationGraduate').value);
+    payload.selfEmployedYes = Number(document.getElementById('selfEmployedYes').value);
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+
+    try {
+      const res = await fetch(API + '/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      showResult(data);
+      showToast('Application submitted successfully!');
+    } catch (err) {
+      showToast('Could not reach backend — is it running on port 8080?', true);
+    } finally {
+      btn.classList.remove('loading'); btn.disabled = false;
+    }
+  }
+
+  function showResult(data) {
+    const card = document.getElementById('resultCard');
+    const badge = document.getElementById('decisionBadge');
+    const fill = document.getElementById('riskBarFill');
+    const val = document.getElementById('riskValue');
+    const desc = document.getElementById('resultDesc');
+
+    const dec = (data.decision || 'UNKNOWN').toUpperCase();
+    const risk = typeof data.riskScore === 'number' ? data.riskScore : 0.5;
+
+    const map = {
+      'APPROVED':      { cls:'approved',  icon:'✓', color:'var(--accent)',  text:'Congratulations! Your loan application has been approved based on your financial profile and CIBIL score.' },
+      'REJECTED':      { cls:'rejected',  icon:'✕', color:'var(--danger)',  text:'Your application was declined. A CIBIL score below 500 indicates high default risk. Consider improving your credit profile before re-applying.' },
+      'HIGH_RISK':     { cls:'high-risk', icon:'⚠', color:'var(--warn)',    text:'The ML model flagged your application as high risk. A human officer will review it before a final decision is made.' },
+      'MANUAL_REVIEW': { cls:'manual',    icon:'⊙', color:'var(--accent2)', text:'Our automated system is temporarily unavailable. Your application has been queued for manual review by our team.' }
+    };
+    const m = map[dec] || map['MANUAL_REVIEW'];
+
+    card.className = 'result-card ' + m.cls;
+    badge.className = 'decision-badge ' + m.cls;
+    badge.innerHTML = `<span>${m.icon}</span> ${dec.replace('_',' ')}`;
+    val.style.color = m.color;
+    fill.style.background = m.color;
+    setTimeout(() => fill.style.width = (risk * 100) + '%', 50);
+    val.textContent = (risk * 100).toFixed(0) + '%';
+    desc.textContent = m.text;
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  async function loadHistory() {
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Loading...</div></td></tr>';
+    try {
+      const res = await fetch(API + '/history');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" stroke="#3a3a50" stroke-width="1.5"/><path d="M14 20h12M14 14h12M14 26h6" stroke="#3a3a50" stroke-width="1.5" stroke-linecap="round"/></svg>No applications found</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td>#${r.id}</td>
+          <td>${r.cibilScore}</td>
+          <td>₹${fmt(r.incomeAnnum)}</td>
+          <td>₹${fmt(r.loanAmount)}</td>
+          <td>${(r.riskScore * 100).toFixed(0)}%</td>
+          <td><span class="badge ${(r.decision||'').toLowerCase()}">${(r.decision||'').replace('_',' ')}</span></td>
+          <td>${r.createdAt ? new Date(r.createdAt).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}) : '—'}</td>
+        </tr>`).join('');
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">⚠ Could not reach backend — ensure it\'s running on localhost:8080</div></td></tr>';
+    }
+  }
+
+  function fmt(n) { return Number(n).toLocaleString('en-IN'); }
+
+  function showToast(msg, err = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (err ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3500);
+  }
+</script>
+</body>
+</html>

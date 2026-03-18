@@ -1,20 +1,15 @@
-# Java
 target/
 *.log
 
-# Python
 __pycache__/
 *.pyc
 *.pkl
 
-# Env
 .env
 *.env
 
-# IDE
 .vscode/
 .idea/
 
-# OS
 .DS_Store
 Thumbs.db
